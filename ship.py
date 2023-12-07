@@ -14,6 +14,7 @@ class Ship:
 
         self.rect.centerx = self.screen_rect.centerx
         self.rect.bottom = self.screen_rect.bottom
+        self.lives = DynamicSettings().lives
 
         self.moving_right = False
         self.moving_left = False
@@ -27,9 +28,19 @@ class Ship:
         self.last_shot_time = 0
         self.shooting_speed = DynamicSettings().shooting_speed
         self.shooting_delay = DynamicSettings().delay
+        self.shooting_sound = pygame.mixer.Sound('sounds/interactive_sounds/shoot.mp3')
 
     def blitme(self):
         self.screen.blit(self.image, self.rect)
+
+    def reset(self):
+        self.rect.centerx = self.screen_rect.centerx
+        self.rect.bottom = self.screen_rect.bottom
+
+    def boom(self):
+        boom_sound = pygame.mixer.Sound('sounds/interactive_sounds/boom.mp3')
+        boom_sound.play()
+        pygame.time.wait(1000)
 
     def update_status(self):
         if self.moving_right and self.rect.right < self.screen_rect.right:
@@ -45,10 +56,6 @@ class Ship:
             current_time = time.time()
             last_time = self.last_shot_time
             if current_time - last_time > self.shooting_delay:
+                self.shooting_sound.play()
                 self.bullets.add(Bullet(self.screen, self))
                 self.last_shot_time = current_time
-
-
-
-
-

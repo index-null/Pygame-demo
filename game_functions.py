@@ -1,6 +1,6 @@
 import pygame
 import sys
-
+from enemy import Enemy
 
 
 def check_keydown_events(_ship, _event, _screen):
@@ -33,17 +33,22 @@ def check_keyup_events(_ship, _event):
             _ship.is_shooting = False
 
 
-def check_events(_ship, _screen, _bullets):
+def check_events(_ship, _screen, _bullets, _special_events, _enemies):
+    # 设置定时器事件
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
+
+        if event.type == _special_events:
+            _enemies.add(Enemy(_screen))
 
         check_keydown_events(_ship=_ship, _event=event, _screen=_screen)
 
         check_keyup_events(_ship=_ship, _event=event)
 
 
-def update_screen(_screen, _ship, _static_settings, _bullets, _background):
+def update_screen(_screen, _ship, _bullets, _background, _enemies):
     _screen.blit(_background, (0, 0))
 
     _ship.update_status()
@@ -53,6 +58,20 @@ def update_screen(_screen, _ship, _static_settings, _bullets, _background):
     for bullet in _bullets.sprites():
         bullet.update()
         bullet.blitme()
+
+    # checks bullets and enemies collisions
+    pygame.sprite.groupcollide(_bullets, _enemies, True, True)
+
+    if pygame.sprite.spritecollideany(_ship, _enemies):
+        _ship.lives -= 1
+        _ship.boom()
+        _ship.reset()
+        _bullets.empty()
+        _enemies.empty()
+
+    for enemy in _enemies.sprites():
+        enemy.update()
+        enemy.blitme()
 
     pygame.display.flip()
 
